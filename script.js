@@ -1,4 +1,5 @@
 let now = moment();
+let Timeblocks =[];
 
 // Get Status (Past, Present, Future)
 const getStatus = (time) => {
@@ -10,27 +11,37 @@ const getStatus = (time) => {
   };
   return "present";
 }
+
 // Save Event
 const saveEvent = (id) => {
   let text = $(`#${id}`).val();
-  console.log(text);
+  Timeblocks[id-9].text=text;
+  saveTimeblocks();
+};
+
+const saveTimeblocks = () => {
+  localStorage.setItem("events", JSON.stringify(Timeblocks));
 };
 
 // Get Time Blocks
 const getTimeBlocks = () => {
-  let Timeblocks = [];
-  // check for local storage
-  for (i=9; i <18; i++) {
-    let hour = moment(i, "H").format("h A");
-    let status = getStatus(i);
-    let text = "";
-    let block = {
-      id: i,
-      hour: hour,
-      status: status,
-      text: text
+  let events = JSON.parse(localStorage.getItem("events"));
+  // if no events in local storage, create blank ones
+  if (!events) {
+    for (i=9; i <18; i++) {
+      let hour = moment(i, "H").format("h A");
+      let status = getStatus(i);
+      let text = "";
+      let block = {
+        id: i,
+        hour: hour,
+        status: status,
+        text: text
+      };
+      Timeblocks.push(block)
     };
-    Timeblocks.push(block)
+  } else {
+    Timeblocks = events;
   };
   return Timeblocks;
 };
