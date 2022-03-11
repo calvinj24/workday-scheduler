@@ -1,6 +1,6 @@
 let now = moment();
-let Timeblocks = [];
 
+// Get Status (Past, Present, Future)
 const getStatus = (time) => {
   if (time > Number(now.format("H"))) {
     return "future";
@@ -10,33 +10,63 @@ const getStatus = (time) => {
   };
   return "present";
 }
+// Save Event
+const saveEvent = (id) => {
+  let text = $(`#${id}`).val();
+  console.log(text);
+};
 
-for (i=9; i <18; i++) {
-  let hour = moment(i, "H").format("h A");
-  let status = getStatus(i);
-  let block = {
-    id: i,
-    hour: hour,
-    status: status
-  }
-  Timeblocks.push(block);
-}
+// Get Time Blocks
+const getTimeBlocks = () => {
+  let Timeblocks = [];
+  // check for local storage
+  for (i=9; i <18; i++) {
+    let hour = moment(i, "H").format("h A");
+    let status = getStatus(i);
+    let text = "";
+    let block = {
+      id: i,
+      hour: hour,
+      status: status,
+      text: text
+    };
+    Timeblocks.push(block)
+  };
+  return Timeblocks;
+};
 
-// Displays Current Day in Header
-$("#currentDay").text(now.format("[Today is] dddd, MMMM Do"));
-let html = ""
+// Load Time Blocks
+const loadTimeBlocks = () => {
+  let blocks = getTimeBlocks();
+  blocks.forEach(block => {
+    let row = $("<div>").addClass("row");
+    let hour = $("<div>").addClass("hour").text(block.hour);
+    let textArea = $("<textarea>")
+      .addClass("time-block")
+      .addClass(block.status)
+      .attr("id", block.id)
+      .val(block.text);
+    let saveBtn = $("<button>")
+      .addClass("saveBtn")
+      .attr("id","save-"+block.id)
+      .text("SAVE");
+    row.append(hour);
+    row.append(textArea);
+    row.append(saveBtn);
+    $(".container").append(row);
+  })
+};
 
-// // Timeblocks
-Timeblocks.forEach(block => {
-  let add = `
-    <div class="row">
-      <div class="hour">${block.hour}</div>
-      <div class="time-block ${block.status}" id="${block.id}"></div>
-      <button class="saveBtn" id="save-${block.id}">SAVE</button>
-    </div>
-  `
-  html += add;
-});
+// Load Page
+$("document").ready(function(){
+  // Displays Current Day in Header
+  $("#currentDay").text(now.format("[Today is] dddd, MMMM Do"));
 
-$(".container").append(html);
+  loadTimeBlocks();
 
+  $(".saveBtn").click(function(){
+    id = this.id;
+    timeBlock = id.split("-")[1];
+    saveEvent(timeBlock);
+  })
+})
